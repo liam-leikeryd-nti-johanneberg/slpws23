@@ -5,18 +5,69 @@ require 'bcrypt'
 require 'sinatra/reloader'
 require_relative './model.rb'
 
+enable :sessions
+
+
+
 get('/') do
     slim('layout')
 end
 
+get('/showlogin') do
+    slim(:login)
+end
+
+get('/users/new') do
+    slim(:register)
+end
+
+
+
+
+
+post('/login') do
+    username = params[:username]
+    password = params[:password]
+    db = SQLite3::Database.new('db/setup_creator.db')
+    db.results_as_hash = true
+    result = db.execute("SELECT * FROM users WHERE username = ?",username).first  
+    pwdigest = result["pwdigest"]
+    id = result["id"]
+  
+    if BCrypt::Password.new(pwdigest) == password 
+      session[:id] = id
+      redirect('/setup/new')
+    else 
+      "FEL LÖSEN!" 
+    end
+  end
+
+post('/users/new') do
+    username = params[:username]
+    password = params[:password]
+    password_confirm = params[:password_confirm]
+  
+    if (password == password_confirm)
+      password_digest = BCrypt::Password.create(password)
+      db = SQLite3::Database.new('db/setup_creator.db')
+      db.execute("INSERT INTO users (username,pwdigest) VALUES (?,?)",username,password_digest)
+      redirect('/')
+    else
+      "Lösenorden matchade inte!"
+    end
+  end
+
 get('/setup/new') do
-    slim(:'setup_new')
+    slim(:'setup/setup_new')
 end
 
 post('/setup/new/driver') do
     woods_brand = params[:woods_brand]
 
     if (woods_brand == "Titleist")
+
+
+
         redirect('/setup/driver/titleist')
     
     elsif (woods_brand == "Callaway")
@@ -34,22 +85,22 @@ post('/setup/new/driver') do
 end
 
 get('/setup/driver/titleist') do
-    slim(:'setup_driver_titleist')
+    slim(:'setup/setup_driver_titleist')
     
 end
 
 get('/setup/driver/callaway') do
-    slim(:'setup_driver_callaway')
+    slim(:'setup/setup_driver_callaway')
     
 end
 
 get('/setup/driver/taylormade') do
-    slim(:'setup_driver_taylormade')
+    slim(:'setup/setup_driver_taylormade')
     
 end
 
 get('/setup/driver/cobra') do
-    slim(:'setup_driver_cobra')
+    slim(:'setup/setup_driver_cobra')
     
 end
 
@@ -58,7 +109,7 @@ post('/choosen/driver') do
 end
 
 get('/setup/new/irons') do
-    slim(:'setup_irons')
+    slim(:'setup/setup_irons')
 end
 
 post('/setup/brand/irons') do
@@ -79,22 +130,22 @@ post('/setup/brand/irons') do
 end
 
 get('/setup/irons/titleist') do
-    slim(:'setup_irons_titleist')
+    slim(:'setup/setup_irons_titleist')
     
 end
 
 get('/setup/irons/callaway') do
-    slim(:'setup_irons_callaway')
+    slim(:'setup/setup_irons_callaway')
     
 end
 
 get('/setup/irons/taylormade') do
-    slim(:'setup_irons_taylormade')
+    slim(:'setup/setup_irons_taylormade')
     
 end
 
 get('/setup/irons/cobra') do
-    slim(:'setup_irons_cobra')
+    slim(:'setup/setup_irons_cobra')
     
 end
 
@@ -103,7 +154,7 @@ post('/choosen/irons') do
 end
 
 get('/setup/new/wedges') do
-    slim(:'setup_wedges')
+    slim(:'setup/setup_wedges')
 end
 
 post('/setup/brand/wedges') do
@@ -124,22 +175,22 @@ post('/setup/brand/wedges') do
 end
 
 get('/setup/wedges/titleist') do
-    slim(:'setup_wedges_titleist')
+    slim(:'setup/setup_wedges_titleist')
     
 end
 
 get('/setup/wedges/callaway') do
-    slim(:'setup_wedges_callaway')
+    slim(:'setup/setup_wedges_callaway')
     
 end
 
 get('/setup/wedges/taylormade') do
-    slim(:'setup_wedges_taylormade')
+    slim(:'setup/setup_wedges_taylormade')
     
 end
 
 get('/setup/wedges/cobra') do
-    slim(:'setup_wedges_cobra')
+    slim(:'setup/setup_wedges_cobra')
     
 end
 
@@ -148,7 +199,7 @@ post('/choosen/wedges') do
 end
 
 get('/setup/new/putter') do
-    slim(:'setup_putter')
+    slim(:'setup/setup_putter')
 end
 
 post('/setup/brand/putter') do
@@ -169,22 +220,22 @@ post('/setup/brand/putter') do
 end
 
 get('/setup/putter/titleist') do
-    slim(:'setup_putter_titleist')
+    slim(:'setup/setup_putter_titleist')
     
 end
 
 get('/setup/putter/callaway') do
-    slim(:'setup_putter_callaway')
+    slim(:'setup/setup_putter_callaway')
     
 end
 
 get('/setup/putter/taylormade') do
-    slim(:'setup_putter_taylormade')
+    slim(:'setup/setup_putter_taylormade')
     
 end
 
 get('/setup/putter/cobra') do
-    slim(:'setup_putter_cobra')
+    slim(:'setup/setup_putter_cobra')
     
 end
 
