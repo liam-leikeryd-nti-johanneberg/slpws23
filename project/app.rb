@@ -63,6 +63,7 @@ end
 
 post('/setup/new/driver') do
     woods_brand = params[:woods_brand]
+    session[:setup] = {woods_brand: woods_brand}
 
     if (woods_brand == "Titleist")
 
@@ -105,6 +106,8 @@ get('/setup/driver/cobra') do
 end
 
 post('/choosen/driver') do
+    woods_model = params[:woods_model]
+    session[:setup][:woods_model] = woods_model
     redirect('/setup/new/irons')
 end
 
@@ -114,6 +117,7 @@ end
 
 post('/setup/brand/irons') do
     irons_brand = params[:irons_brand]
+    session[:setup][:irons_brand] = irons_brand
 
     if (irons_brand == "Titleist")
         redirect('/setup/irons/titleist')
@@ -130,6 +134,7 @@ post('/setup/brand/irons') do
 end
 
 get('/setup/irons/titleist') do
+    
     slim(:'setup/setup_irons_titleist')
     
 end
@@ -150,6 +155,8 @@ get('/setup/irons/cobra') do
 end
 
 post('/choosen/irons') do
+    irons_model = params[:irons_model]
+    session[:setup][:irons_model] = irons_model
     redirect('/setup/new/wedges')
 end
 
@@ -159,6 +166,7 @@ end
 
 post('/setup/brand/wedges') do
     wedges_brand = params[:wedges_brand]
+    session[:setup][:wedges_brand] = wedges_brand
 
     if (wedges_brand == "Titleist")
         redirect('/setup/wedges/titleist')
@@ -195,6 +203,8 @@ get('/setup/wedges/cobra') do
 end
 
 post('/choosen/wedges') do
+    wedges_model = params[:wedges_model]
+    session[:setup][:wedges_model] = wedges_model
     redirect('/setup/new/putter')
 end
 
@@ -204,6 +214,8 @@ end
 
 post('/setup/brand/putter') do
     putter_brand = params[:putter_brand]
+    session[:setup][:putter_brand] = putter_brand
+
 
     if (putter_brand == "Titleist")
         redirect('/setup/putter/titleist')
@@ -238,6 +250,23 @@ get('/setup/putter/cobra') do
     slim(:'setup/setup_putter_cobra')
     
 end
+
+post('/choosen/putter') do
+    putter_model = params[:putter_model]
+    session[:setup][:putter_model] = putter_model
+    db = SQLite3::Database.new('db/setup_creator.db')
+    count = db.execute("SELECT COUNT(*) FROM wedges WHERE user_id = ?", session[:id])[0][0]
+order = count + 1
+
+    db.execute("INSERT INTO woods (brand,model,user_id, `order`) VALUES (?,?,?,?) ", session[:setup][:woods_brand], session[:setup][:woods_model], session[:id], order)
+    db.execute("INSERT INTO irons (brand,model,user_id, `order`) VALUES (?,?,?,?) ", session[:setup][:irons_brand], session[:setup][:irons_model], session[:id], order)
+    db.execute("INSERT INTO wedges (brand,model,user_id, `order`) VALUES (?,?,?,?) ", session[:setup][:wedges_brand], session[:setup][:wedges_model], session[:id], order)
+    db.execute("INSERT INTO putter (brand,model,user_id, `order`) VALUES (?,?,?,?) ", session[:setup][:putter_brand], session[:setup][:putter_model], session[:id], order)
+
+    redirect('/setup/new')
+end
+
+
 
 # post('/choosen/wedges') do
 #     redirect('/setup/new/putter')
