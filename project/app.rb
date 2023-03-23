@@ -266,6 +266,24 @@ order = count + 1
     redirect('/setup/new')
 end
 
+get('/show/setups') do
+    db = SQLite3::Database.new('db/setup_creator.db')
+    highest_order = db.execute("SELECT MAX(order) FROM woods WHERE user_id = ?", session[:id])
+    p = highest_order
+    orders = {}
+    i = 1
+    while i <= highest_order
+       club1 = db.execute("SELECT model FROM woods WHERE (user_id,order) = (?,?)", session[:id], i)
+       club2 = db.execute("SELECT model FROM irons WHERE (user_id,order) = (?,?)", session[:id], i)
+        club3 = db.execute("SELECT model FROM wedges WHERE (user_id,order) = (?,?)", session[:id], i)
+        club4 = db.execute("SELECT model FROM putter WHERE (user_id,order) = (?,?)", session[:id], i)
+        orders["order#{i}"] = [club1, club2, club3, club4]
+    end
+    slim(:show_setups, locals:{orders: orders})
+end
+
+
+
 
 
 # post('/choosen/wedges') do
