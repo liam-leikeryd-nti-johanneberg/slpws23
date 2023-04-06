@@ -1,6 +1,9 @@
 h1 These are your setups 
 
-
+a href="/setup/new" Create new setup! 
+form action="/setup/remove" method="POST"
+    input type="text" name="order_delete" placeholder="Choose number to delete"
+    input type="submit" value="Delete setup"
 
 - orders.values.each_with_index do |order, index| 
     p = index + 1
