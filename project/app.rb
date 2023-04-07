@@ -263,7 +263,7 @@ order = count + 1
     db.execute("INSERT INTO wedges (brand,model,user_id, `order`) VALUES (?,?,?,?) ", session[:setup][:wedges_brand], session[:setup][:wedges_model], session[:id], order)
     db.execute("INSERT INTO putter (brand,model,user_id, `order`) VALUES (?,?,?,?) ", session[:setup][:putter_brand], session[:setup][:putter_model], session[:id], order)
 
-    redirect('/setup/new')
+    redirect('/show/setups')
 end
 
 get('/show/setups') do
@@ -274,17 +274,32 @@ get('/show/setups') do
     p highest_order
     orders = {}
     i = 1
-    while i <= highest_order
-       club1 = db.execute("SELECT model FROM woods WHERE (user_id,`order`) = (?,?)", session[:id], i).first
-       club2 = db.execute("SELECT model FROM irons WHERE (user_id,`order`) = (?,?)", session[:id], i).first
-        club3 = db.execute("SELECT model FROM wedges WHERE (user_id,`order`) = (?,?)", session[:id], i).first
-        club4 = db.execute("SELECT model FROM putter WHERE (user_id,`order`) = (?,?)", session[:id], i).first
-        orders["order#{i}"] = [club1, club2, club3, club4]
-        p orders
-        i = i+1
+    if highest_order != nil
+        while i <= highest_order
+            club1 = db.execute("SELECT model FROM woods WHERE (user_id,`order`) = (?,?)", session[:id], i).first
+            club2 = db.execute("SELECT model FROM irons WHERE (user_id,`order`) = (?,?)", session[:id], i).first
+            club3 = db.execute("SELECT model FROM wedges WHERE (user_id,`order`) = (?,?)", session[:id], i).first
+            club4 = db.execute("SELECT model FROM putter WHERE (user_id,`order`) = (?,?)", session[:id], i).first
+            orders["order#{i}"] = [club1, club2, club3, club4]
+            p orders
+            i = i+1
+        end
     end
     slim(:show_setups, locals:{orders: orders})
 end
+
+post('/setup/remove') do
+    order_delete = params[:order_delete].to_i
+    id = params[:id].to_i
+    db = SQLite3::Database.new('db/setup_creator.db')
+    db.execute("DELETE FROM woods WHERE (user_id,`order`) = (?,?)", id, order_delete)
+    db.execute("DELETE FROM irons WHERE (user_id,`order`) = (?,?)", id, order_delete)
+    db.execute("DELETE FROM wedges WHERE (user_id,`order`) = (?,?)", id, order_delete)
+    db.execute("DELETE FROM putter WHERE (user_id,`order`) = (?,?)", id, order_delete)
+    redirect('/show/setups')
+end
+
+
 
 
 
